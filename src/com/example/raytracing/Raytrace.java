@@ -9,6 +9,7 @@ public class Raytrace {
     private int width;
     private int height;
     private ArrayList<Sphere> sphereList;
+    static int maxDepth = 3;
 
     Raytrace(int width, int height, ArrayList<Sphere> sphereList) {
         this.width = width;
@@ -68,25 +69,61 @@ public class Raytrace {
         double[] heightLinspace = screenObj.getHeightLinspace();
         double[] widthLinspace = screenObj.getWidthLinspace();
         for (int y = 0; y < heightLinspace.length; ++y) {
+            System.out.println("Progress: "+(y+1)+"/"+heightLinspace.length);
             for (int x = 0; x < widthLinspace.length; ++x) {
                 double[] pixel = {heightLinspace[x], widthLinspace[y], 0.0};
                 double[] rayOrigin = Camera.camera;
-                double[] rayDirection = LinearAlgebra.vectorSubtraction(pixel, rayOrigin);
-                double direction = LinearAlgebra.normalize(rayDirection);
+                double[] rayDirection = LinearAlgebra.vectorNormalize(
+                        LinearAlgebra.vectorSubtraction(pixel, rayOrigin)
+                );
 
-                List<Object> ret = nearestIntersectedSphere(sphereList, rayOrigin, rayDirection);
-                Sphere nearestSphere = (Sphere) ret.get(0);
-                double minDistance = (double) ret.get(1);
+                double[] color = {0.0, 0.0, 0.0};
+                double reflection = 1.0;
 
-                if(nearestSphere == null)
-                    continue;
+                for(int k=0; k<Raytrace.maxDepth; ++k) {
+                    List<Object> ret = nearestIntersectedSphere(sphereList, rayOrigin, rayDirection);
+                    Sphere nearestSphere = (Sphere) ret.get(0);
+                    double minDistance = (double) ret.get(1);
 
-                double[] intersection = LinearAlgebra.vectorAddition(rayOrigin, LinearAlgebra.scalarVectorMultiplication(minDistance,
-                        LinearAlgebra.vectorNormalize(rayDirection)));
+                    if(nearestSphere == null)
+                        break;
 
-                
+                    double[] intersection = LinearAlgebra.vectorAddition(rayOrigin,
+                            LinearAlgebra.scalarVectorMultiplication(minDistance,
+                                    LinearAlgebra.vectorNormalize(rayDirection)));
+
+                    double[] normalToSurface = LinearAlgebra.vectorNormalize(
+                            LinearAlgebra.vectorSubtraction(intersection, nearestSphere.getCenter())
+                    );
+
+                    double[] shiftedPoint = LinearAlgebra.vectorAddition(
+                            intersection, LinearAlgebra.scalarVectorMultiplication(1e-5, normalToSurface)
+                    );
+                    double[] intersectionToLight = LinearAlgebra.vectorNormalize(
+                            LinearAlgebra.vectorSubtraction(Light.lightPosition, shiftedPoint)
+                    );
+
+                    ret = nearestIntersectedSphere(sphereList, shiftedPoint, intersectionToLight);
+                    double minDistance2 = (double) ret.get(1);
+
+                    double intersectionToLightDistance = LinearAlgebra.normalize(
+                            LinearAlgebra.vectorSubtraction(Light.lightPosition, intersection)
+                    );
+
+                    boolean isShadowed = minDistance2 < intersectionToLightDistance;
+
+                    if(isShadowed)
+                        break;
+
+                    double[] illumination = {0.0, 0.0, 0.0};
+
+
+
+
+
+
+                }
             }
-            System.out.println("Progress: "+(y+1)+"/"+heightLinspace.length);
         }
     }
 }
