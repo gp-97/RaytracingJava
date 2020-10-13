@@ -52,4 +52,24 @@ public class LinearAlgebra {
             vec[i] += scalar;
         return vec;
     }
+    public static double[] vectorPower(double[] vec, double power) {
+        for(int i=0; i<vec.length; ++i)
+            vec[i] = Math.pow(vec[i], power);
+        return vec;
+    }
+    public static double[] reflected(double[] vec, double[] axis) {
+        double[] tempAxis = LinearAlgebra.scalarVectorMultiplication(
+                2*LinearAlgebra.dot(vec, axis), axis
+        );
+        return LinearAlgebra.vectorSubtraction(vec, tempAxis);
+    }
+    public static double[] clip(double[] vec, double low, double high) {
+        for(int i=0; i<vec.length; ++i) {
+            if(vec[i] < low)
+                vec[i] = low;
+            else if(vec[i] > high)
+                vec[i] = high;
+        }
+        return vec;
+    }
 }

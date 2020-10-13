@@ -61,7 +61,11 @@ public class Raytrace {
         return Arrays.asList(nearestSphere, minDistance);
     }
 
-    public void trace() {
+    public double[][][] trace() {
+
+        ImageArray imageObj = new ImageArray(height, width, 3);
+        double[][][] image = imageObj.getImage();
+
         this.screenObj = new Screen(width, height);
         screenObj.createScreen();
         screenObj.createLinspaces();
@@ -117,13 +121,55 @@ public class Raytrace {
 
                     double[] illumination = {0.0, 0.0, 0.0};
 
+                    illumination = LinearAlgebra.vectorAddition(
+                            illumination, LinearAlgebra.hadamard(
+                                    nearestSphere.getAmbient(), Light.lightAmbient
+                            )
+                    );
 
+                    double dot = LinearAlgebra.dot(intersectionToLight, normalToSurface);
 
+                    illumination = LinearAlgebra.vectorAddition(
+                            illumination, LinearAlgebra.hadamard(nearestSphere.getDiffuse(),
+                                    nearestSphere.getDiffuse())
+                    );
 
+                    illumination = LinearAlgebra.scalarVectorMultiplication(dot, illumination);
 
+                    double[] intersectionToCamera = LinearAlgebra.vectorNormalize(
+                            LinearAlgebra.vectorSubtraction(
+                                    Camera.camera, intersection
+                            )
+                    );
 
+                    double[] H = LinearAlgebra.vectorNormalize(
+                            LinearAlgebra.vectorAddition(intersectionToLight, intersectionToCamera)
+                    );
+
+                    double[] tempSpecular = LinearAlgebra.hadamard(
+                            nearestSphere.getSpecular(), Light.lightSpecular
+                    );
+                    tempSpecular = LinearAlgebra.scalarVectorMultiplication(
+                            LinearAlgebra.dot(normalToSurface, H), tempSpecular
+                    );
+                    double shininessCoefficient = nearestSphere.getShininess() / 4.0;
+
+                    tempSpecular = LinearAlgebra.vectorPower(tempSpecular, shininessCoefficient);
+
+                    illumination = LinearAlgebra.vectorAddition(illumination, tempSpecular);
+
+                    color = LinearAlgebra.vectorAddition(
+                            color, LinearAlgebra.scalarVectorMultiplication(reflection, illumination)
+                    );
+
+                    rayOrigin = shiftedPoint;
+                    rayDirection = LinearAlgebra.reflected(rayDirection, normalToSurface);
                 }
+                double[] clippedColor = LinearAlgebra.clip(color, 0, 1);
+                for(int iter=0; iter<3; ++iter)
+                    image[y][x][iter] = clippedColor[iter];
             }
         }
+        return image;
     }
 }

@@ -1,12 +1,13 @@
 package com.example.raytracing;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Main {
     public static void main(String[] args) {
-        int width = 10;
-        int height = 10;
-        int noOfSpheres = 1;
+        int width = 1024;
+        int height = 1024;
+        int noOfSpheres = 4;
 
         ArrayList<Sphere> sphereList = new ArrayList<>(noOfSpheres);
 //        for(int i=0; i<noOfSpheres; ++i) {
@@ -91,6 +92,6 @@ public class Main {
         // TODO: ends
 
         Raytrace rt = new Raytrace(width, height, sphereList);
-        rt.trace();
+        double[][][] ret = rt.trace();
     }
 }
