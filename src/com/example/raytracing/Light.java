@@ -1,6 +1,5 @@
 package com.example.raytracing;
 
 public class Light {
-    private double lightPosition;
-
+    static double[] lightPosition = {5.0, 5.0, 5.0};
 }
