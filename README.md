@@ -4,9 +4,9 @@
 
 Simple Raytracing programme written in Java.
 
-![]()
+![](https://github.com/gp-97/RaytracingJava/blob/master/Output/DemoVid.gif)
 
-# Changes to be made
+## Changes to be made
  - Correct the specular information
  - Correct the illumination 
 
