@@ -1,5 +1,7 @@
 package com.example.raytracing;
 
+import java.util.Arrays;
+
 public class Screen {
     private int width;
     private int height;

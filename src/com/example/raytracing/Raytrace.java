@@ -9,7 +9,7 @@ public class Raytrace {
     private int width;
     private int height;
     private ArrayList<Sphere> sphereList;
-    static int maxDepth = 3;
+    static int maxDepth = 2;
 
     Raytrace(int width, int height, ArrayList<Sphere> sphereList) {
         this.width = width;
@@ -19,23 +19,18 @@ public class Raytrace {
 
     private double sphereIntersect(double[] center, double radius,
                                    double[] rayOrigin, double[] rayDirection) {
-//        double[] b = LinearAlgebra.scalarVectorMultiplication(2.0 * rayDirection,
-//                LinearAlgebra.vectorSubtraction(rayOrigin, center));
-        double b = 2 * LinearAlgebra.dot(rayDirection, LinearAlgebra.vectorSubtraction(rayOrigin, center));
-//        System.out.println("b: "+b);
+        double b = 2 * LinearAlgebra.dot(rayDirection,
+                LinearAlgebra.vectorSubtraction(rayOrigin, center));
         double c = Math.pow(LinearAlgebra.normalize(LinearAlgebra.vectorSubtraction(rayOrigin, center)), 2.0) -
                 Math.pow(radius, 2.0);
-//        System.out.println("c: "+c);
-        double delta = b*b - 4*c;
-//        System.out.println("delta: "+delta);
+        double delta = Math.pow(b, 2.0) - 4*c;
         double t1, t2;
         if(delta > 0.0) {
             t1 = (-b + Math.sqrt(delta)) / 2.0;
             t2 = (-b - Math.sqrt(delta)) / 2.0;
 
-            if(t1 > 0 && t2 > 0) {
+            if(t1 > 0 && t2 > 0)
                 return Math.min(t1, t2);
-            }
         }
         return Double.MIN_VALUE;
     }
@@ -72,9 +67,9 @@ public class Raytrace {
 
         double[] heightLinspace = screenObj.getHeightLinspace();
         double[] widthLinspace = screenObj.getWidthLinspace();
-        for (int y = 0; y < heightLinspace.length; ++y) {
-            System.out.println("Progress: "+(y+1)+"/"+heightLinspace.length);
-            for (int x = 0; x < widthLinspace.length; ++x) {
+
+        for (int y = 0; y < heightLinspace.length; y++) {
+            for (int x = 0; x < widthLinspace.length; x++) {
                 double[] pixel = {heightLinspace[x], widthLinspace[y], 0.0};
                 double[] rayOrigin = Camera.camera;
                 double[] rayDirection = LinearAlgebra.vectorNormalize(
@@ -93,8 +88,8 @@ public class Raytrace {
                         break;
 
                     double[] intersection = LinearAlgebra.vectorAddition(rayOrigin,
-                            LinearAlgebra.scalarVectorMultiplication(minDistance,
-                                    LinearAlgebra.vectorNormalize(rayDirection)));
+                            LinearAlgebra.scalarVectorMultiplication(minDistance, rayDirection));
+
 
                     double[] normalToSurface = LinearAlgebra.vectorNormalize(
                             LinearAlgebra.vectorSubtraction(intersection, nearestSphere.getCenter())
@@ -114,9 +109,7 @@ public class Raytrace {
                             LinearAlgebra.vectorSubtraction(Light.lightPosition, intersection)
                     );
 
-                    boolean isShadowed = minDistance2 < intersectionToLightDistance;
-
-                    if(isShadowed)
+                    if(minDistance2 < intersectionToLightDistance)
                         break;
 
                     double[] illumination = {0.0, 0.0, 0.0};
@@ -129,17 +122,13 @@ public class Raytrace {
 
                     double dot = LinearAlgebra.dot(intersectionToLight, normalToSurface);
 
-                    illumination = LinearAlgebra.vectorAddition(
-                            illumination, LinearAlgebra.hadamard(nearestSphere.getDiffuse(),
-                                    nearestSphere.getDiffuse())
-                    );
+                    double[] tempDot = LinearAlgebra.hadamard(nearestSphere.getDiffuse(), Light.lightDiffuse);
+                    tempDot = LinearAlgebra.scalarVectorMultiplication(dot, tempDot);
 
-                    illumination = LinearAlgebra.scalarVectorMultiplication(dot, illumination);
+                    illumination = LinearAlgebra.vectorAddition(illumination, tempDot);
 
                     double[] intersectionToCamera = LinearAlgebra.vectorNormalize(
-                            LinearAlgebra.vectorSubtraction(
-                                    Camera.camera, intersection
-                            )
+                            LinearAlgebra.vectorSubtraction(Camera.camera, intersection)
                     );
 
                     double[] H = LinearAlgebra.vectorNormalize(
@@ -166,8 +155,7 @@ public class Raytrace {
                     rayDirection = LinearAlgebra.reflected(rayDirection, normalToSurface);
                 }
                 double[] clippedColor = LinearAlgebra.clip(color, 0, 1);
-                for(int iter=0; iter<3; ++iter)
-                    image[y][x][iter] = clippedColor[iter];
+                image[y][x] = LinearAlgebra.scalarVectorMultiplication(255.0, color);
             }
         }
         return image;
