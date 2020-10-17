@@ -9,7 +9,7 @@ public class Raytrace {
     private int width;
     private int height;
     private ArrayList<Sphere> sphereList;
-    static int maxDepth = 2;
+    static int maxDepth = 3;
 
     Raytrace(int width, int height, ArrayList<Sphere> sphereList) {
         this.width = width;
@@ -70,13 +70,13 @@ public class Raytrace {
 
         for (int y = 0; y < heightLinspace.length; y++) {
             for (int x = 0; x < widthLinspace.length; x++) {
-                double[] pixel = {heightLinspace[x], widthLinspace[y], 0.0};
+                double[] pixel = {widthLinspace[x], heightLinspace[y], 0.0};
                 double[] rayOrigin = Camera.camera;
                 double[] rayDirection = LinearAlgebra.vectorNormalize(
                         LinearAlgebra.vectorSubtraction(pixel, rayOrigin)
                 );
 
-                double[] color = {0.0, 0.0, 0.0};
+                double[] color = {0.05, 0.05, 0.05};
                 double reflection = 1.0;
 
                 for(int k=0; k<Raytrace.maxDepth; ++k) {
@@ -96,7 +96,7 @@ public class Raytrace {
                     );
 
                     double[] shiftedPoint = LinearAlgebra.vectorAddition(
-                            intersection, LinearAlgebra.scalarVectorMultiplication(1e-5, normalToSurface)
+                            intersection, LinearAlgebra.scalarVectorMultiplication(1.0+1e-5, normalToSurface)
                     );
                     double[] intersectionToLight = LinearAlgebra.vectorNormalize(
                             LinearAlgebra.vectorSubtraction(Light.lightPosition, shiftedPoint)
@@ -112,7 +112,7 @@ public class Raytrace {
                     if(minDistance2 < intersectionToLightDistance)
                         break;
 
-                    double[] illumination = {0.0, 0.0, 0.0};
+                    double[] illumination = {0.10, 0.10, 0.10};
 
                     illumination = LinearAlgebra.vectorAddition(
                             illumination, LinearAlgebra.hadamard(
@@ -150,6 +150,7 @@ public class Raytrace {
                     color = LinearAlgebra.vectorAddition(
                             color, LinearAlgebra.scalarVectorMultiplication(reflection, illumination)
                     );
+                    reflection *= nearestSphere.getReflection();
 
                     rayOrigin = shiftedPoint;
                     rayDirection = LinearAlgebra.reflected(rayDirection, normalToSurface);
