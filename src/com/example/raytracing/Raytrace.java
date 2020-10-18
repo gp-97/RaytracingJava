@@ -56,7 +56,7 @@ public class Raytrace {
         return Arrays.asList(nearestSphere, minDistance);
     }
 
-    public double[][][] trace() {
+    public double[][][] trace(int frameNumber, int totalFrames) {
 
         ImageArray imageObj = new ImageArray(height, width, 3);
         double[][][] image = imageObj.getImage();
@@ -69,6 +69,10 @@ public class Raytrace {
         double[] widthLinspace = screenObj.getWidthLinspace();
 
         for (int y = 0; y < heightLinspace.length; y++) {
+            double progress = (y * 1.0 / heightLinspace.length) * 100;
+            String progressPercentage = Double.toString(progress).concat("000");
+            System.out.print("\rTracing frame: "+frameNumber+"/"+totalFrames+
+                    "\t\tProgress: "+progressPercentage.substring(0, 5).toString()+"%");
             for (int x = 0; x < widthLinspace.length; x++) {
                 double[] pixel = {widthLinspace[x], heightLinspace[y], 0.0};
                 double[] rayOrigin = Camera.camera;

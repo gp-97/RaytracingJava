@@ -88,7 +88,7 @@ public class Main {
         int lim = 2400;
         for(int i=0; i<lim; ++i) {
             Light.lightPosition[0] += 1;
-            double[][][] img = rt.trace();
+            double[][][] img = rt.trace(i, lim);
             for (int y = 0; y < height; ++y)
                 for (int x = 0; x < width; ++x) {
                     double[] RGB = img[y][x];
@@ -100,7 +100,7 @@ public class Main {
             String num = Integer.toString(i);
             File outputFile = new File("./data/outputs/output"+num+".png");
             ImageIO.write(imgObj, "png", outputFile);
-            System.out.println("Progress: "+i+"/"+lim);
         }
+        System.out.println("Tracing complete");
     }
 }
