@@ -4,7 +4,7 @@
 
 Simple Raytracing programme written in Java.
 
-![](https://github.com/gp-97/RaytracingJava/blob/master/data/outputs/DemoVid.gif)
+<div align="center"><img src="https://github.com/gp-97/RaytracingJava/blob/master/data/outputs/DemoVid.gif"/></div>
 
 ## Changes to be made
  - Correct the specular information
